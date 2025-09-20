@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Salad Journey for @dnd62 on discord.</title>
+
+  <!-- Discord Embed Metadata -->
+  <meta property="og:title" content="A salad blog tutorial personally made for Kai!">
+  <meta property="og:description" content="Salad a salad @dnd62">
+  <meta property="og:image" content="https://buildasalad.blog/salad.png">
+  <meta property="og:url" content="https://buildasalad.blog">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Clean bold font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* RESET */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html,body {
+      height: 100%;
+      width: 100%;
+      background: #000;
+      color: #e6fbee;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
+    }
+
+    /* PARTICLE CANVAS (background) */
+    #particles {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      display: block;
+      background: #000; /* fallback */
+    }
+
+    /* INTRO (fullscreen) */
+  #intro {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.2));
+    transition: opacity 800ms ease, visibility 800ms;
+  }
+  #intro.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    #intro-text {
+      color: #00ff88;
+      font-weight: 700;
+      font-size: clamp(18px, 2.6vw, 28px);
+      letter-spacing: 1px;
+      text-align: center;
+      line-height: 1.1;
+      padding: 18px 28px;
+      border-radius: 10px;
+      /* subtle neon, less blurry */
+      text-shadow:
+        0 0 6px rgba(0,255,136,0.6),
+        0 0 18px rgba(0,255,136,0.18);
+      backdrop-filter: blur(0px);
+    }
+
+    /* MAIN (after intro) */
+  #main {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    width: 100%;
+    display: none;
+    opacity: 0;
+    transition: opacity 800ms ease;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  #main.visible { display: flex; opacity: 1; }
+
+    /* CONTENT GRID: left text / right image */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      gap: 48px;
+      align-items: center;
+      padding: 24px;
+    }
+
+    @media (max-width: 980px) {
+      .container { grid-template-columns: 1fr; gap: 28px; padding: 12px; }
+      #salad { max-width: 80%; margin: 0 auto; display: block; }
+    }
+
+    /* TITLE */
+    .title {
+      color: #00ff88;
+      font-weight: 800;
+      font-size: clamp(26px, 4vw, 44px);
+      line-height: 1.05;
+      margin-bottom: 18px;
+      text-shadow: 0 0 10px rgba(0,255,136,0.35);
+    }
+
+    .subtitle {
+      color: #bfeed0;
+      font-size: 15px;
+      margin-bottom: 26px;
+      max-width: 680px;
+      line-height: 1.5;
+    }
+
+    /* TUTORIAL COLUMNS */
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    margin-top: 18px;
+  }
+  .column {
+    background: rgba(255,255,255,0.02);
+    padding: 16px;
+    border-radius: 12px;
+    color: #dbeee0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  }
+    .column strong {
+      color: #00ff88;
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .column p {
+      color: #cfe8d7;
+      font-size: 15px;
+      line-height: 1.6;
+      opacity: 0.95;
+    }
+
+    /* SALAD IMAGE (right column) */
+    #salad {
+      display: block;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      /* remove outline / heavy glow as requested */
+      box-shadow: none;
+      transform-origin: center;
+      transition: transform 700ms cubic-bezier(.2,.9,.2,1), opacity 700ms;
+      opacity: 0;
+      filter: none;
+    }
+
+    /* animate salad gently */
+    #salad.float {
+      animation: float 5s ease-in-out infinite;
+      opacity: 1;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* MENU BUTTON top-left (white page icon) */
+    #menu-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: 36px;
+      height: 36px;
+      z-index: 40;
+      cursor: pointer;
+      transition: transform 160ms ease;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+    }
+    #menu-btn:active { transform: scale(.98); }
+
+    /* OVERLAY / MODAL */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+    #overlay.active {
+      opacity: 1;
+      pointer-events: all;
+      background: rgba(0,0,0,0.4);
+    }
+
+    #modal {
+      width: 92%;
+      max-width: 420px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 38px rgba(0,0,0,0.6);
+      border: 1.8px solid rgba(0,255,136,0.12); /* subtle green outline */
+      position: relative;
+      transform: translateY(12px) scale(.96);
+      opacity: 0;
+      transition: transform 320ms cubic-bezier(.2,.9,.2,1), opacity 280ms;
+    }
+    #overlay.active #modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      box-shadow: 0 12px 40px rgba(0,255,136,0.06);
+      border-color: rgba(0,255,136,0.28);
+    }
+
+    #modal h2 {
+      color: #00ff88;
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-size: 18px;
+      text-align: center;
+    }
+    #modal img { width: 100%; border-radius: 10px; display: block; }
+
+    /* Close button (black round button with white X) */
+    #close-btn {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
+      background: #000; /* black button per request */
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      z-index: 10;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: transform 140ms;
+    }
+    #close-btn:active { transform: scale(.97); }
+
+    /* CURSOR HALO */
+    .cursor {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      background: radial-gradient(circle, rgba(0,255,136,0.12) 0%, rgba(0,255,136,0.06) 35%, transparent 70%);
+      transition: left .06s linear, top .06s linear;
+      mix-blend-mode: screen;
+      filter: blur(6px);
+    }
+
+    /* small screens tweaks */
+    @media (max-width: 560px) {
+      #intro-text { font-size: 18px; padding: 12px 16px; }
+      .column { padding: 14px; }
+      #close-btn { width: 34px; height: 34px; top: -8px; right: -8px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- INTRO -->
+  <div id="intro" aria-hidden="false">
+    <div id="intro-text">Click anywhere to start your salad journey!</div>
+  </div>
+
+  <!-- PARTICLES (canvas) -->
+  <canvas id="particles" aria-hidden="true"></canvas>
+
+  <!-- MENU button (white page icon) -->
+  <img id="menu-btn" src="https://img.icons8.com/ios-filled/50/ffffff/document.png" alt="Menu">
+
+  <!-- OVERLAY / MODAL -->
+  <div id="overlay" aria-hidden="true">
+    <div id="modal" role="dialog" aria-modal="true" aria-label="Modal">
+      <div id="close-btn" title="Close" role="button" aria-label="Close modal">&times;</div>
+      <h2>Eat a Salad, don't Gain 400KG like this guy.</h2>
+      <img src="troll.png" alt="Troll image">
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT (hidden until intro click) -->
+  <main id="main" role="main" aria-hidden="true">
+    <div class="container">
+
+      <!-- Left: text / tutorial -->
+      <section class="left-col" aria-label="Salad tutorial">
+        <h1 class="title">I know damn well Kai asked this,<br> but anyway, here's the recipe</h1>
+        <div class="subtitle">
+          Kai you should keep this website pinned!!
+        </div>
+
+        <div class="columns" aria-hidden="false">
+          <div class="column" aria-label="Step one">
+            <strong>Step One — Pick Your Base</strong>
+            <p>
+              Start with high-quality greens. Mix textures for interest:
+              romaine or butter lettuce for crunch, spinach or spring mix for tenderness,
+              and kale or arugula if you want a heartier bite.
+            </p>
+          </div>
+
+          <div class="column" aria-label="Step two">
+            <strong>Step Two — Add Veggies & Color</strong>
+            <p>
+              Choose 3+ colors and textures: cherry tomatoes, cucumbers, bell peppers, carrots, radishes.
+              Roasted vegetables add depth; raw veg keeps things bright and crunchy.
+            </p>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="columns" aria-hidden="false">
+          <div class="column" aria-label="Step three">
+            <strong>Step Three — Protein & Crunch</strong>
+            <p>
+              Add a protein: grilled chicken, beans, chickpeas, tuna, or tofu.
+              Sprinkle seeds, nuts, or crispy shallots for crunch and contrast.
+            </p>
+          </div>
+
+          <div class="column" aria-label="Step four">
+            <strong>Step Four — Dressing & Finish</strong>
+            <p>
+              Dress lightly and taste as you go: acid, fat, salt, and sweetness.
+              Finish with fresh herbs, crumbled cheese, or a citrus zest for brightness.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: salad image -->
+      <aside class="right-col" aria-label="Salad image">
+        <img id="salad" src="salad.png" alt="Delicious salad">
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- subtle cursor halo -->
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <!-- background music (will start after user interacts with the page) -->
+  <audio id="bg-music" src="song.mp3" loop preload="auto"></audio>
+
+  <script>
+    /* ---------- INTRO -> MAIN + AUDIO ---------- */
+  const intro = document.getElementById('intro');
+  const main = document.getElementById('main');
+  const bgMusic = document.getElementById('bg-music');
+  const saladImg = document.getElementById('salad');
+
+  function openMain() {
+    intro.classList.add('hidden');
+    setTimeout(() => {
+      main.style.display = 'flex';
+      requestAnimationFrame(() => {
+        main.classList.add('visible');
+        saladImg.classList.add('float');
+      });
+    }, 800); // wait until fade out finishes
+
+    try {
+      const p = bgMusic.play();
+      if (p && p.catch) p.catch(() => {});
+    } catch (e) {}
+  }
+
+    // click anywhere on intro to start
+    intro.addEventListener('click', openMain, { once: true });
+    intro.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') openMain();
+    });
+
+    /* ---------- CURSOR HALO (centered) ---------- */
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (ev) => {
+      cursor.style.left = ev.clientX + 'px';
+      cursor.style.top  = ev.clientY + 'px';
+    });
+    // small fade when leaving window
+    window.addEventListener('mouseout', () => { cursor.style.opacity = '0.2'; });
+    window.addEventListener('mouseover', () => { cursor.style.opacity = '1'; });
+
+    /* ---------- MODAL (menu button) ---------- */
+    const menuBtn = document.getElementById('menu-btn');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('close-btn');
+
+    menuBtn.addEventListener('click', () => {
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden','false');
+    });
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden','true');
+    });
+    // close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+        overlay.setAttribute('aria-hidden','true');
+      }
+    });
+
+    /* ---------- PARTICLES (tiny slowly falling green dots) ---------- */
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth * devicePixelRatio;
+      canvas.height = window.innerHeight * devicePixelRatio;
+      canvas.style.width  = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let particles = [];
+    const PARTICLE_COUNT = 110;
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+          x: Math.random() * canvas.width / devicePixelRatio,
+          y: Math.random() * canvas.height / devicePixelRatio,
+          r: Math.random() * 1.6 + 0.6,
+          speed: Math.random() * 0.6 + 0.15,
+          alpha: Math.random() * 0.6 + 0.18
+        });
+      }
+    }
+    initParticles();
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width / devicePixelRatio, canvas.height / devicePixelRatio);
+
+      for (let p of particles) {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(0,255,136,${p.alpha})`;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      update();
+      requestAnimationFrame(draw);
+    }
+
+    function update() {
+      for (let p of particles) {
+        p.y += p.speed;
+        // tiny sway for natural motion
+        p.x += Math.sin(p.y * 0.01) * 0.3;
+        if (p.y > canvas.height / devicePixelRatio + 20) {
+          p.y = -10 - Math.random() * 60;
+          p.x = Math.random() * canvas.width / devicePixelRatio;
+          p.alpha = Math.random() * 0.6 + 0.18;
+        }
+      }
+    }
+
+    draw();
+
+    /* ---------- SAFETY: catch audio play promise rejections ---------- */
+    bgMusic.addEventListener('play', () => {
+      // nothing — just ensures play event exists
+    });
+
+    /* ---------- Accessibility hint: if user clicks menu while intro still visible, open modal after intro hides ---------- */
+    // The menu btn will open modal normally; no additional handling needed.
+  </script>
+</body>
+</html>
